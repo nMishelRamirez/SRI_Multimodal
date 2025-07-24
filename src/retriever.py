@@ -1,7 +1,7 @@
 import numpy as np
 import faiss
-from app.encoder import encode_image, encode_text
-from app.config import INDEX_FILE, PATHS_FILE, DESCRIPTIONS_FILE
+from encoder import encode_image, encode_text
+from config import INDEX_FILE, PATHS_FILE, DESCRIPTIONS_FILE
 
 index = faiss.read_index(INDEX_FILE)
 paths = np.load(PATHS_FILE, allow_pickle=True)

@@ -2,8 +2,8 @@ import pandas as pd
 import numpy as np
 import faiss
 import os
-from app.encoder import encode_image
-from app.config import IMAGES_DIR, CAPTIONS_FILE, INDEX_FILE, PATHS_FILE, DESCRIPTIONS_FILE
+from encoder import encode_image
+from config import IMAGES_DIR, CAPTIONS_FILE, INDEX_FILE, PATHS_FILE, DESCRIPTIONS_FILE
 
 def build_index():
     df = pd.read_csv(CAPTIONS_FILE)

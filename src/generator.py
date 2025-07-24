@@ -1,6 +1,6 @@
 import openai
 import pandas as pd
-from app.config import OPENAI_API_KEY, CONCEPTS_FILE
+from config import OPENAI_API_KEY, CONCEPTS_FILE
 
 openai.api_key = OPENAI_API_KEY
 

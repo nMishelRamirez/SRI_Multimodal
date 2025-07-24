@@ -1,3 +1,6 @@
+transformers
+flask
+numpy
 torch
 torchvision
 faiss-cpu

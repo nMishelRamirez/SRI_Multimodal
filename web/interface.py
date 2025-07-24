@@ -1,6 +1,6 @@
 import streamlit as st
-from app.retriever import retrieve_by_image, retrieve_by_text
-from app.generator import build_context_from_labels, generate_response
+from retriever import retrieve_by_image, retrieve_by_text
+from generator import build_context_from_labels, generate_response
 import tempfile
 from PIL import Image
 
