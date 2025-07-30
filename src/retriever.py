@@ -1,23 +1,76 @@
+# SRI_Multimodal/src/retriever.py (Anteriormente search_engine.py)
+
 import numpy as np
-import faiss
-from encoder import encode_image, encode_text
-from config import INDEX_FILE, PATHS_FILE, DESCRIPTIONS_FILE
+import os
+from PIL import Image
 
-index = faiss.read_index(INDEX_FILE)
-paths = np.load(PATHS_FILE, allow_pickle=True)
-descs = np.load(DESCRIPTIONS_FILE, allow_pickle=True)
+# Importaciones relativas
+from src.indexer import FaissVectorDB 
+from src.embedding import generate_text_embeddings, generate_image_embedding, combine_embeddings
+from src.config import EMBEDDING_MODEL_NAME
 
-def get_labels_from_indices(indices):
-    # Devuelve las etiquetas cortas (columna caption del CSV original)
-    return [descs[i] for i in indices[0]]  # descs ya contiene los labels
+def retrieve_by_text(query_text: str, faiss_db: FaissVectorDB, k: int = 5):
+    """
+    Busca imágenes en la base de datos FAISS utilizando una consulta de texto.
+    """
+    if faiss_db is None:
+        print("Error: La base de datos FAISS no está inicializada.")
+        return None, None
 
+    # Generar embedding para el texto de consulta
+    text_embedding = generate_text_embeddings([query_text], model_name=EMBEDDING_MODEL_NAME)[0]
+    
+    # Realizar búsqueda en el índice FAISS
+    distances, indices = faiss_db.search(text_embedding, k=k)
+    return distances, indices
 
-def retrieve_by_image(image_path, k=5):
-    q_emb = encode_image(image_path).cpu().numpy()
-    D, I = index.search(q_emb, k)
-    return paths[I[0]], descs[I[0]]
+def retrieve_by_image(query_image_path: str, faiss_db: FaissVectorDB, k: int = 5):
+    """
+    Busca imágenes en la base de datos FAISS utilizando una imagen de consulta.
+    """
+    if faiss_db is None:
+        print("Error: La base de datos FAISS no está inicializada.")
+        return None, None
 
-def retrieve_by_text(text_query, k=5):
-    q_emb = encode_text(text_query).cpu().numpy()
-    D, I = index.search(q_emb, k)
-    return paths[I[0]], descs[I[0]]
+    if not os.path.exists(query_image_path):
+        print(f"Error: La ruta de la imagen de consulta no existe: {query_image_path}")
+        return None, None
+    
+    try:
+        image_embedding = generate_image_embedding(query_image_path, model_name=EMBEDDING_MODEL_NAME)
+    except Exception as e:
+        print(f"Error al generar embedding para la imagen '{query_image_path}': {e}")
+        return None, None
+    
+    distances, indices = faiss_db.search(image_embedding, k=k)
+    return distances, indices
+
+def retrieve_by_text_and_image(query_text: str, query_image_path: str, faiss_db: FaissVectorDB, k: int = 5, alpha: float = 0.5):
+    """
+    Busca imágenes combinando una consulta de texto y una imagen.
+    """
+    if faiss_db is None:
+        print("Error: La base de datos FAISS no está inicializada.")
+        return None, None
+
+    if not os.path.exists(query_image_path):
+        print(f"Error: La ruta de la imagen de consulta no existe: {query_image_path}")
+        return None, None
+
+    # Generar embeddings para texto e imagen
+    text_embedding = generate_text_embeddings([query_text], model_name=EMBEDDING_MODEL_NAME)[0]
+    
+    try:
+        image_embedding = generate_image_embedding(query_image_path, model_name=EMBEDDING_MODEL_NAME)
+    except Exception as e:
+        print(f"Error al generar embedding para la imagen '{query_image_path}': {e}")
+        return None, None
+
+    # Combinar embeddings
+    text_embedding_2d = text_embedding.reshape(1, -1)
+    image_embedding_2d = image_embedding.reshape(1, -1)
+    
+    combined_query_embedding = combine_embeddings(text_embedding_2d, image_embedding_2d, alpha=alpha)[0]
+    
+    distances, indices = faiss_db.search(combined_query_embedding, k=k)
+    return distances, indices
