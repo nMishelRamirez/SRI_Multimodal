@@ -1,4 +1,4 @@
-# SRI_Multimodal/src/retriever.py (Anteriormente search_engine.py)
+# SRI_Multimodal/src/retriever.py 
 
 import numpy as np
 import os
@@ -43,34 +43,4 @@ def retrieve_by_image(query_image_path: str, faiss_db: FaissVectorDB, k: int = 5
         return None, None
     
     distances, indices = faiss_db.search(image_embedding, k=k)
-    return distances, indices
-
-def retrieve_by_text_and_image(query_text: str, query_image_path: str, faiss_db: FaissVectorDB, k: int = 5, alpha: float = 0.5):
-    """
-    Busca imágenes combinando una consulta de texto y una imagen.
-    """
-    if faiss_db is None:
-        print("Error: La base de datos FAISS no está inicializada.")
-        return None, None
-
-    if not os.path.exists(query_image_path):
-        print(f"Error: La ruta de la imagen de consulta no existe: {query_image_path}")
-        return None, None
-
-    # Generar embeddings para texto e imagen
-    text_embedding = generate_text_embeddings([query_text], model_name=EMBEDDING_MODEL_NAME)[0]
-    
-    try:
-        image_embedding = generate_image_embedding(query_image_path, model_name=EMBEDDING_MODEL_NAME)
-    except Exception as e:
-        print(f"Error al generar embedding para la imagen '{query_image_path}': {e}")
-        return None, None
-
-    # Combinar embeddings
-    text_embedding_2d = text_embedding.reshape(1, -1)
-    image_embedding_2d = image_embedding.reshape(1, -1)
-    
-    combined_query_embedding = combine_embeddings(text_embedding_2d, image_embedding_2d, alpha=alpha)[0]
-    
-    distances, indices = faiss_db.search(combined_query_embedding, k=k)
     return distances, indices

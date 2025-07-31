@@ -82,7 +82,6 @@ target/
 # IPython
 profile_default/
 ipython_config.py
-config.json
 
 # pyenv
 #   For a library or package, you might want to ignore these files since the code is
@@ -208,3 +207,4 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 config.json
+metadata_flickr8k.csv

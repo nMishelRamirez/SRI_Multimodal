@@ -8,14 +8,12 @@ from nltk.stem import WordNetLemmatizer
 import pandas as pd
 from typing import List
 
-# Asegurarse de que los recursos de NLTK estén descargados
-# Esto se debería ejecutar una vez al configurar el entorno
-# Si no los tienes, descomenta y ejecuta estas líneas una vez:
-nltk.download('punkt')
-nltk.download('stopwords')
-nltk.download('wordnet')
-nltk.download('omw-1.4') 
-nltk.download('punkt_tab')
+# Recursos de NLTK 
+# nltk.download('punkt')
+# nltk.download('stopwords')
+# nltk.download('wordnet')
+# nltk.download('omw-1.4') 
+# nltk.download('punkt_tab')
 
 # Inicializar recursos de NLTK
 try:
@@ -24,17 +22,15 @@ try:
 except LookupError:
     print("Advertencia: Recursos de NLTK no encontrados. Ejecuta 'python -c \"import nltk; nltk.download(\'punkt\'); nltk.download(\'stopwords\'); nltk.download(\'wordnet\'); nltk.download(\'omw-1.4\')\"'")
     stop_words = set() # Fallback si no están descargados
-    lemmatizer = None # Fallback
+    lemmatizer = None
 
 def clean_text(text: str) -> str:
     """Elimina caracteres especiales, números y convierte a minúsculas."""
     text = text.lower()
-    text = re.sub(r'\[.*?\]', '', text) # Eliminar texto entre corchetes
-    text = re.sub(r'\S*@\S*\s?', '', text) # Eliminar direcciones de correo electrónico
-    text = re.sub(r'http\S+', '', text) # Eliminar URLs
-    text = re.sub(f'[{re.escape(string.punctuation)}]', '', text) # Eliminar puntuación
-    text = re.sub(r'\d+', '', text) # Eliminar números
-    text = re.sub(r'\s+', ' ', text).strip() # Eliminar espacios extra
+    text = re.sub(r'\[.*?\]', '', text)                             # Eliminar texto entre corchetes
+    text = re.sub(f'[{re.escape(string.punctuation)}]', '', text)   # Eliminar puntuación
+    text = re.sub(r'\d+', '', text)                                 # Eliminar números
+    text = re.sub(r'\s+', ' ', text).strip()                        # Eliminar espacios extra
     return text
 
 def tokenize_text(text: str) -> List[str]:
@@ -49,7 +45,7 @@ def lemmatize_tokens(tokens: List[str]) -> List[str]:
     """Lematiza una lista de tokens."""
     if lemmatizer:
         return [lemmatizer.lemmatize(word) for word in tokens]
-    return tokens # Retorna sin lematizar si lemmatizer no está disponible
+    return tokens  # Retorna sin lematizar si lemmatizer no está disponible
 
 def preprocess_document(document: str) -> str:
     """Aplica todas las etapas de preprocesamiento a un solo documento."""
@@ -67,7 +63,7 @@ def preprocess_documents(documents: List[str]) -> pd.DataFrame:
     df_processed = pd.DataFrame({'original_doc': documents, 'prep_doc': preprocessed_docs})
     return df_processed
 
-def merge_captions_by_image(df: pd.DataFrame, image_col: str = 'file_name', caption_col: str = 'caption') -> pd.DataFrame:
+def concatenar_captions_by_image(df: pd.DataFrame, image_col: str = 'file_name', caption_col: str = 'caption') -> pd.DataFrame:
     """
     Combina múltiples captions para la misma imagen en una sola cadena de texto.
     """
