@@ -20,7 +20,7 @@ from src.data_loader import load_flickr8k_data_adapted
 from src.preprocessing import preprocess_documents, concatenar_captions_by_image
 from src.embedding import generate_text_embeddings, generate_image_embeddings, generate_image_embedding
 from src.indexer import FaissVectorDB
-from src.retriever import retrieve_by_text, retrieve_by_image, retrieve_by_text_and_image
+from src.retriever import retrieve_by_text, retrieve_by_image
     
 
 def calculate_euclidean_distance(vec1: np.ndarray, vec2: np.ndarray) -> float:
@@ -31,6 +31,23 @@ def main():
     print("===============================================")
     print("         PRUEBAS SRI MULTIMODAL                ")
     print("===============================================")
+
+    import pickle
+    import pandas as pd
+
+    # Ruta al archivo .pkl
+    pkl_path = r'C:\Users\Mishel Ramirez\OneDrive\Escritorio\EPN\RecuperacionInfo\SRI_Multimodal\image_info.pkl'
+
+    # Cargar el archivo pickle
+    with open(pkl_path, 'rb') as f:
+        image_info = pickle.load(f)
+
+    # Convertir a DataFrame para visualizar mejor
+    df = pd.DataFrame(image_info)
+
+    # Mostrar las primeras filas
+    print("\n--- Contenido de image_info.pkl ---")
+    print(df.head())
 
     # 1. Carga de Datos
     print("\n--- 1: Carga de Datos ---")

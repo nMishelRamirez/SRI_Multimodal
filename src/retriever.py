@@ -28,13 +28,13 @@ def retrieve_by_image(query_image_path: str, faiss_db: FaissVectorDB, k: int = 5
     """
     Busca imágenes en la base de datos FAISS utilizando una imagen de consulta.
     """
-    if faiss_db is None:
-        print("Error: La base de datos FAISS no está inicializada.")
-        return None, None
+    # if faiss_db is None:
+    #     print("Error: La base de datos FAISS no está inicializada.")
+    #     return None, None
 
-    if not os.path.exists(query_image_path):
-        print(f"Error: La ruta de la imagen de consulta no existe: {query_image_path}")
-        return None, None
+    # if not os.path.exists(query_image_path):
+    #     print(f"Error: La ruta de la imagen de consulta no existe: {query_image_path}")
+    #     return None, None
     
     try:
         image_embedding = generate_image_embedding(query_image_path, model_name=EMBEDDING_MODEL_NAME)
