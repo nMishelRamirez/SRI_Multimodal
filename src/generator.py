@@ -10,6 +10,19 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 # Importaciones absolutas desde el paquete src
 from src.config import OPENAI_API_KEY, GENERATIVE_MODEL_NAME, GENERATION_MAX_NEW_TOKENS
 
+# Inicializar cliente OpenAI
+_openai_client = None
+
+def get_openai_client():
+    """Retorna la instancia del cliente OpenAI cargado."""
+    global _openai_client
+    if _openai_client is None:
+        if not OPENAI_API_KEY:
+            raise ValueError("OPENAI_API_KEY no está configurada en src/config.py.")
+        _openai_client = OpenAI(api_key=OPENAI_API_KEY)
+        print("Cliente OpenAI inicializado.")
+    return _openai_client
+    
 
 def build_prompt(text_query: str, retrieved_captions: List[str]) -> str:
     """
@@ -34,9 +47,10 @@ def build_prompt(text_query: str, retrieved_captions: List[str]) -> str:
     1. Tu respuesta debe contener **solo la descripción**, sin frases introductorias como "Claro," o "Aquí está...,".
     2. **No hagas referencia** a descripciones previas, fuentes de texto, subtítulos o la consulta.
     3. **Comienza directamente describiendo la imagen**, por ejemplo: "En esta imagen se observa..."
-    4. No inventes información que no esté en el contexto.
-    5. Si la consulta es ambigua (ej. "¿Qué es esto?"), responde según la **primera descripción**.
-    6. Si no hay información suficiente, responde literalmente:
+    4. Unicamente responde con **UNA** descripcion general, No redactes mas de una descripción.
+    5. No inventes información que no esté en el contexto.
+    6. Si la consulta es ambigua (ej. "¿Qué es esto?"), responde según la **primera descripción**.
+    7. Si no hay información suficiente, responde literalmente:
     "Lo siento, no encontré información suficiente para responder a tu consulta."
 
     ---
@@ -55,7 +69,7 @@ def generate_response(prompt: str, client, modelo: str = "gpt-4.1") -> str:
             model=modelo,
             input=prompt
         )
-        return  response.output_tex
+        return  response.output[0].content[0].text
     
     except Exception as e:
         print(f"Error al generar respuesta con OpenAI API: {e}")

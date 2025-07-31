@@ -12,7 +12,7 @@ from src.config import FLICKR8K_DATASET_DIR, TOP_K_RETRIEVAL, GENERATIVE_MODEL_N
 from src.embedding import generate_image_embedding, generate_text_embeddings
 from src.indexer import FaissVectorDB 
 from src.retriever import retrieve_by_text, retrieve_by_image
-from src.generator import build_prompt, generate_response,get_openai_client
+from src.generator import build_prompt, generate_response, get_openai_client
 
 @st.cache_resource
 def load_all_resources():
@@ -21,7 +21,7 @@ def load_all_resources():
     Se utiliza st.cache_resource para que se cargue una única vez.
     """
     st.write("Cargando base de datos FAISS...")
-    faiss_db_instance = FaissVectorDB.load_index() # load_index ya usa las rutas de config
+    faiss_db_instance = FaissVectorDB.load_index() 
     if faiss_db_instance is None:
         st.error("Error al cargar el índice FAISS. Por favor, asegúrate de haber ejecutado 'python src/build_index.py' primero.")
         st.stop() # Detiene la ejecución de la app Streamlit
@@ -30,6 +30,7 @@ def load_all_resources():
 
 # Cargar todos los recursos
 faiss_db = load_all_resources()
+openai_client = get_openai_client()
 
 # Configuración de la página Streamlit
 st.set_page_config(layout="wide", page_title="SRI Multimodal RAG")
@@ -55,7 +56,7 @@ with tab1:
         if indices is not None and len(indices[0]) > 0:
             # Filtrar índices -1 y obtener información de los resultados válidos
             valid_indices = [idx for idx in indices[0] if idx != -1 and idx < len(faiss_db.image_info)]
-            # Ordenar los resultados por distancia (FAISS ya los devuelve ordenados, pero es una buena práctica)
+            # Ordenar los resultados por distancia 
             # Asegurarse de que las distancias también se correspondan con los índices válidos
             valid_distances = [d for i, d in enumerate(distances[0]) if indices[0][i] != -1 and indices[0][i] < len(faiss_db.image_info)]
             
@@ -68,6 +69,14 @@ with tab1:
                     'caption': info['caption'],
                     'distance': valid_distances[i]
                 })
+            # Imprimir los resultados en la consola
+            print("\n--- Resultados de la búsqueda por texto ---")
+            for result in retrieved_results:
+                print(f"Archivo: {result['file_name']}")
+                print(f"Descripción: {result['caption']}")
+                print(f"Distancia: {result['distance']:.4f}")
+                print("-" * 30)
+            print("--- Fin de los resultados ---")
             
             # Mostrar resultados con la nueva disposición
             if retrieved_results:
@@ -117,7 +126,7 @@ with tab1:
                 st.header("Respuesta Generada (RAG)")
                 # Construir el prompt para generar la respuesta
                 prompt = build_prompt('Haz lo que dice el prompt, y no menciones "claro" ni "aquí está..."', [result['caption'] for result in retrieved_results])
-                generated_response = generate_response(prompt)
+                generated_response = generate_response(prompt, openai_client)
                 st.write(generated_response)
             else:
                 st.write("No se encontraron resultados para tu consulta.")
@@ -161,6 +170,14 @@ with tab2:
                 'caption': info['caption'],
                 'distance': valid_distances[i]
             })
+        # Imprimir los resultados en la consola
+        print("\n--- Resultados de la búsqueda por texto ---")
+        for result in retrieved_results:
+            print(f"Archivo: {result['file_name']}")
+            print(f"Descripción: {result['caption']}")
+            print(f"Distancia: {result['distance']:.4f}")
+            print("-" * 30)
+        print("--- Fin de los resultados ---")
         
         # Mostrar resultados con la nueva disposición
         if retrieved_results:
@@ -209,7 +226,7 @@ with tab2:
             st.header("Respuesta Generada (RAG)")
             # Construir el prompt para generar la respuesta
             prompt = build_prompt('Haz lo que dice el prompt, y no menciones "claro" ni "aquí está..."', [result['caption'] for result in retrieved_results])
-            generated_response = generate_response(prompt)
+            generated_response = generate_response(prompt, openai_client)
             st.write(generated_response)
             
         else:

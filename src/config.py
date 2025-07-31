@@ -54,6 +54,9 @@ if os.path.exists(CONFIG_JSON_PATH):
 else:
     print(f"No se encontró config.json en {CONFIG_JSON_PATH}. Usando valores predeterminados.")
 
+# API Keys (preferiblemente cargadas desde variables de entorno para producción)
+OPENAI_API_KEY = _additional_config.get("OPENAI_API_KEY", None)
+
 # Función para obtener el dispositivo (CPU/GPU)
 def get_device():
     """
